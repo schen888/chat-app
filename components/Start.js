@@ -121,16 +121,15 @@ const styles = StyleSheet.create({
   startWrapper: {
     flex: 2,
     backgroundColor: 'white',
-    height: '20%',
+    maxHeight: '60%',
     width: '88%',
     alignItems: 'center',
-    justifyContent: 'space-around',
-    paddingVertical: '6%',
+    justifyContent: 'space-evenly',
+    //paddingVertical: '6%',
   },
 
   inputWrapper: {
     flexDirection: 'row',
-    //justifyContent: 'start',
     alignItems: 'center',
     borderColor: 'lightgrey',
     opacity: 50,
@@ -188,7 +187,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     width: 40,
     height: 40,
-    marginTop: 15,
+    marginTop: '4%',
     marginRight: 25,
   },
 
