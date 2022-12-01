@@ -81,6 +81,9 @@ export default class Start extends React.Component {
                   color: this.state.color,
                 })
               }
+              accessible={true}
+              accessibilityLabel='Start chatting'
+              accessibilityHint='Enter the chat room, where you can send messages to your contacts.'
             >
               <Text style={styles.buttonText}>Start Chatting</Text>
             </TouchableOpacity>
@@ -106,24 +109,28 @@ const styles = StyleSheet.create({
   },
 
   title: {
+    flex:1,
     fontSize: 45,
     fontWeight: '600',
     color: '#FFFFFF',
-    paddingVertical: '15%',
+    paddingTop: '10%',
+    paddingBottom: 0,
+    marginBottom: 0,
   },
 
   startWrapper: {
+    flex: 2,
     backgroundColor: 'white',
-    height: '44%',
+    height: '20%',
     width: '88%',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     paddingVertical: '6%',
   },
 
   inputWrapper: {
     flexDirection: 'row',
-    justifyContent: 'start',
+    //justifyContent: 'start',
     alignItems: 'center',
     borderColor: 'lightgrey',
     opacity: 50,
@@ -133,7 +140,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: 5,
     paddingLeft: 5,
-    paddingRight: -2
   },
 
   icon: {
@@ -153,7 +159,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0,0,0,0)',
     borderWidth: 2,
     borderRadius: 5,
-    zIndex: '1',
+    //elevation: 2,
     position: 'absolute',
     left: -2,
     paddingLeft: 35,
