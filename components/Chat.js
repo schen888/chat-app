@@ -46,6 +46,9 @@ export default class Chat extends React.Component {
     let name = this.props.route.params.name;
     this.props.navigation.setOptions({ title: name });
 
+    //connect to messages collection
+    this.referenceShoppingLists = firebase.firestore().collection('messages');
+
     this.setState({
       messages: [
         {
