@@ -13,7 +13,7 @@ import Chat from './components/Chat';
 
 const Stack = createStackNavigator();
 
-export default class HelloWorld extends Component {
+export default class ChatApp extends Component {
   render() {
     
     return (

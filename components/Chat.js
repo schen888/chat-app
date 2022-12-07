@@ -8,6 +8,8 @@ export default class Chat extends React.Component {
     super();
     this.state = {
       messages: [],
+      uid:'',
+      loggedInText: 'Please wait, you are getting logged in',
     }
 
     // Initialize Firebase with ChatApp's config 
@@ -21,12 +23,17 @@ export default class Chat extends React.Component {
         appId: "1:709536287370:web:33de61f4d17afcd9e1fb73"
       });
     }
+
+    //connect to messages collection
+    this.referenceMessages = firebase.firestore().collection('messages');
   }
 
+  //Append the newly sent message by user to the state & call addMessage
   onSend(messages = []) {
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
-    }))
+    }),
+    ()=>this.addMessage())
   }
 
   renderBubble(props) {
@@ -42,39 +49,71 @@ export default class Chat extends React.Component {
     )
   }
 
+  onCollectionUpdate = (querySnapshot) => {
+    const messages = [];
+    // go through each document
+    querySnapshot.forEach((doc) => {
+      // get the QueryDocumentSnapshot's data
+      let data = doc.data();
+      messages.push({
+        _id: data._id,
+        text: data.text,
+        createdAt: data.createdAt.toDate(),
+        user: data.user,
+      });
+      this.setState({messages})
+    });
+  }
+  //Add the newly sent message to db
+  addMessage= ()=> {
+    const message = this.state.messages[0];
+    this.referenceMessages.add({
+      uid: this.state.uid,
+      _id: message._id,
+      text: message.text || '',
+      createdAt: message.createdAt,
+      user: message.user,
+    });
+  }
+
   componentDidMount(){
     let name = this.props.route.params.name;
     this.props.navigation.setOptions({ title: name });
+    
+    //Authenticate user
+    this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
+      if (!user) {
+        await firebase.auth().signInAnonymously();
+      }
 
-    //connect to messages collection
-    this.referenceShoppingLists = firebase.firestore().collection('messages');
+      /* after user is logged in and the returned obj for connecting with db is not undefined, with onSnapshot() listen to the 
+      changes in the collection, feed snapshot of the collection to onCollectionUpdate() and return the unsunbscribe()*/
+      if (user) {
+        if (this.referenceMessages) {
+          this.unsubscribe = this.referenceMessages
+            .orderBy("createdAt", "desc")
+            .onSnapshot(this.onCollectionUpdate);
+        }
+      
+        //store uid in the state(necessary)
+        this.setState({
+          loggedInText: '',
+          uid: user.uid,
+        });
+      }
+    })   
+  }
 
-    this.setState({
-      messages: [
-        {
-          _id: 1,
-          text: 'You have entered the chat.',
-          createdAt: new Date(),
-          system: true,
-         },
-
-        {
-          _id: 2,
-          text: 'Hello developer',
-          createdAt: new Date(),
-          user: {
-            _id: 2,
-            name: 'React Native',
-            avatar: 'https://placeimg.com/140/140/any',
-          },
-        },
-      ],
-    })
-
+  componentWillUnmount() {
+    // stop listening for changes in collection
+    this.unsubscribe();
+    // stop listening to authentication
+    this.authUnsubscribe();
   }
 
   render() {
     let color=this.props.route.params.color;
+    let name = this.props.route.params.name;
     return (
       <View style={[{flex: 1}, {backgroundColor: color}]}>
         <GiftedChat
@@ -82,7 +121,9 @@ export default class Chat extends React.Component {
           messages={this.state.messages}
           onSend={messages => this.onSend(messages)}
           user={{
-          _id: 1
+            _id: this.state.uid,
+            avatar: 'https://placeimg.com/140/140/any',
+            name: name,
           }}
           accessible={true}
           accessibilityLabel='Chat input field'
@@ -93,9 +134,3 @@ export default class Chat extends React.Component {
     )
   }
 }
-
-/* const styles= StyleSheet.create({
-  container: {
-    flex:1
-  }
-}); */
