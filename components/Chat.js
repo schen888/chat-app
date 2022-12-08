@@ -33,8 +33,9 @@ export default class Chat extends React.Component {
   onSend(messages = []) {
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
-    }),
-    ()=>this.addMessage())
+    }), ()=>{
+      ()=>this.addMessage()
+    })
   }
 
   renderBubble(props) {
@@ -66,6 +67,7 @@ export default class Chat extends React.Component {
     });
   }
   //Add the newly sent message to db (once the state object is updated)
+  // also async????
   addMessage= ()=> {
     const message = this.state.messages[0];
     this.referenceMessages.add({
@@ -77,6 +79,16 @@ export default class Chat extends React.Component {
     });
   }
 
+  //save message into the sayncStorage, after a message is sent (the state object is updated)
+  async saveMessages() {
+    try {
+      await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  //retriev messages from the asyncStorage
   async getMessages() {
     let messages = '';
     try {
@@ -88,6 +100,17 @@ export default class Chat extends React.Component {
       console.log(error.message);
     }
   };
+  //Delete messages from the asyncStorage
+  async deleteMessages() {
+    try {
+      await AsyncStorage.removeItem('messages');
+      this.setState({
+        messages: []
+      })
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
 
   componentDidMount(){
     let name = this.props.route.params.name;
