@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
-import { GiftedChat, Bubble } from 'react-native-gifted-chat';
+import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
 import firebase from 'firebase';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from '@react-native-community/netinfo';
@@ -12,6 +12,7 @@ export default class Chat extends React.Component {
       messages: [],
       uid:'',
       loggedInText: 'Please wait, you are getting logged in',
+      isConnected: false
     }
 
     // Initialize Firebase with ChatApp's config 
@@ -35,9 +36,9 @@ export default class Chat extends React.Component {
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
     }), ()=>{
-      ()=>this.addMessage();
-      ()=>this.saveMessages();
-    })
+      this.addMessage();
+      this.saveMessages();
+    });
   }
 
   onCollectionUpdate = (querySnapshot) => {
@@ -57,19 +58,16 @@ export default class Chat extends React.Component {
   }
   //Add the newly sent message to db (once the state object is updated)
   // also async????
-  async addMessage () {
+  addMessage=()=>{
     const message = this.state.messages[0];
-    try {
-      await this.referenceMessages.add({
+    
+      this.referenceMessages.add({
         uid: this.state.uid,
         _id: message._id,
         text: message.text || '',
         createdAt: message.createdAt,
         user: message.user,
       });
-    } catch (error) {
-      console.log(error);
-    }
   }
 
   //save message into the sayncStorage, after a message is sent (the state object is updated)
@@ -83,7 +81,7 @@ export default class Chat extends React.Component {
 
   //retriev messages from the asyncStorage
   async getMessages() {
-    let messages = '';
+    let messages = "";
     try {
       messages = await AsyncStorage.getItem('messages') || [];
       this.setState({
@@ -109,47 +107,50 @@ export default class Chat extends React.Component {
     let name = this.props.route.params.name;
     this.props.navigation.setOptions({ title: name });
 
+    //Uncomment to delete messages in asyncStorage
+    //this.deleteMessages();
+
     //use netInfo to check if online or offline
     NetInfo.fetch().then(connection => {
       if (connection.isConnected) {
         console.log('online');
+        this.setState({isConnected: true});
+        //Authenticate user
+        this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
+          if (!user) {
+            await firebase.auth().signInAnonymously();
+          }
+          /* after user is logged in and the returned obj for connecting with db is not undefined, with onSnapshot() listen to the 
+          changes in the collection, feed snapshot of the collection to onCollectionUpdate() and return the unsunbscribe()*/
+          if (user) {
+            if (this.referenceMessages) {
+              this.unsubscribe = this.referenceMessages
+                .orderBy("createdAt", "desc")
+                .onSnapshot(this.onCollectionUpdate);
+            }
+            //store uid in the state(necessary)
+            this.setState({
+              loggedInText: '',
+              uid: user.uid,
+            });
+          }
+        })
       } else {
+        this.setState({ isConnected: false });
         console.log('offline');
+        //retrieve pre-stored messages in asyncStorage
+        this.getMessages();
       }
     });
-    
-    //Authenticate user
-    this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
-      if (!user) {
-        await firebase.auth().signInAnonymously();
-      }
-
-      /* after user is logged in and the returned obj for connecting with db is not undefined, with onSnapshot() listen to the 
-      changes in the collection, feed snapshot of the collection to onCollectionUpdate() and return the unsunbscribe()*/
-      if (user) {
-        if (this.referenceMessages) {
-          this.unsubscribe = this.referenceMessages
-            .orderBy("createdAt", "desc")
-            .onSnapshot(this.onCollectionUpdate);
-        }
-      
-        //store uid in the state(necessary)
-        this.setState({
-          loggedInText: '',
-          uid: user.uid,
-        });
-      }
-    })
-
-    //retrieve pre-stored messages in asyncStorage
-    this.getMessages();
   }
 
   componentWillUnmount() {
+    if (this.state.isConnected) {
     // stop listening for changes in collection
     this.unsubscribe();
     // stop listening to authentication
     this.authUnsubscribe();
+    }
   }
 
   //Set color of message bubble
@@ -185,6 +186,7 @@ export default class Chat extends React.Component {
       <View style={[{flex: 1}, {backgroundColor: color}]}>
         <GiftedChat
           renderBubble={this.renderBubble.bind(this)}
+          renderInputToolbar={this.renderInputToolbar.bind(this)}
           messages={this.state.messages}
           onSend={messages => this.onSend(messages)}
           user={{
