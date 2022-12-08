@@ -35,7 +35,8 @@ export default class Chat extends React.Component {
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
     }), ()=>{
-      ()=>this.addMessage()
+      ()=>this.addMessage();
+      ()=>this.saveMessages();
     })
   }
 
@@ -56,15 +57,19 @@ export default class Chat extends React.Component {
   }
   //Add the newly sent message to db (once the state object is updated)
   // also async????
-  addMessage= ()=> {
+  async addMessage () {
     const message = this.state.messages[0];
-    this.referenceMessages.add({
-      uid: this.state.uid,
-      _id: message._id,
-      text: message.text || '',
-      createdAt: message.createdAt,
-      user: message.user,
-    });
+    try {
+      await this.referenceMessages.add({
+        uid: this.state.uid,
+        _id: message._id,
+        text: message.text || '',
+        createdAt: message.createdAt,
+        user: message.user,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   //save message into the sayncStorage, after a message is sent (the state object is updated)
