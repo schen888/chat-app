@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
 import { GiftedChat, Bubble } from 'react-native-gifted-chat';
 import firebase from 'firebase';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default class Chat extends React.Component {
   constructor() {
@@ -64,7 +65,7 @@ export default class Chat extends React.Component {
       this.setState({messages})
     });
   }
-  //Add the newly sent message to db
+  //Add the newly sent message to db (once the state object is updated)
   addMessage= ()=> {
     const message = this.state.messages[0];
     this.referenceMessages.add({
@@ -75,6 +76,18 @@ export default class Chat extends React.Component {
       user: message.user,
     });
   }
+
+  async getMessages() {
+    let messages = '';
+    try {
+      messages = await AsyncStorage.getItem('messages') || [];
+      this.setState({
+        messages: JSON.parse(messages)
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
 
   componentDidMount(){
     let name = this.props.route.params.name;
@@ -101,7 +114,10 @@ export default class Chat extends React.Component {
           uid: user.uid,
         });
       }
-    })   
+    })
+
+    //retrieve pre-stored messages in asyncStorage
+    this.getMessages();
   }
 
   componentWillUnmount() {
