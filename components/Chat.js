@@ -11,7 +11,6 @@ export default class Chat extends React.Component {
     this.state = {
       messages: [],
       uid:'',
-      loggedInText: 'Please wait, you are getting logged in',
       isConnected: false
     }
 
@@ -60,6 +59,7 @@ export default class Chat extends React.Component {
   // also async????
   addMessage=()=>{
     const message = this.state.messages[0];
+    console.log('addMessage:', message);
     
       this.referenceMessages.add({
         uid: this.state.uid,
@@ -74,6 +74,7 @@ export default class Chat extends React.Component {
   async saveMessages() {
     try {
       await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
+      //await AsyncStorage.setItem( "currentUser", JSON.stringify(this.state.messages[0].user) );
     } catch (error) {
       console.log(error.message);
     }
@@ -84,9 +85,11 @@ export default class Chat extends React.Component {
     let messages = "";
     try {
       messages = await AsyncStorage.getItem('messages') || [];
+      console.log('messages in the asyncStorage:', messages);
       this.setState({
         messages: JSON.parse(messages)
       });
+      console.log('state after getMessage:', this.state.messages);
     } catch (error) {
       console.log(error.message);
     }
@@ -115,33 +118,35 @@ export default class Chat extends React.Component {
       if (connection.isConnected) {
         console.log('online');
         this.setState({isConnected: true});
-        //Authenticate user
-        this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
-          if (!user) {
-            await firebase.auth().signInAnonymously();
-          }
-          /* after user is logged in and the returned obj for connecting with db is not undefined, with onSnapshot() listen to the 
-          changes in the collection, feed snapshot of the collection to onCollectionUpdate() and return the unsunbscribe()*/
-          if (user) {
-            if (this.referenceMessages) {
-              this.unsubscribe = this.referenceMessages
-                .orderBy("createdAt", "desc")
-                .onSnapshot(this.onCollectionUpdate);
-            }
-            //store uid in the state(necessary)
-            this.setState({
-              loggedInText: '',
-              uid: user.uid,
-            });
-          }
-        })
       } else {
-        this.setState({ isConnected: false });
-        console.log('offline');
+        console.log("offline");
+        this.setState({isConnected: false});
         //retrieve pre-stored messages in asyncStorage
         this.getMessages();
       }
     });
+
+     //Authenticate user
+     this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
+      console.log('user1', user);
+      if (!user) {
+        await firebase.auth().signInAnonymously();
+      }
+      console.log('user2', user);
+      /* after user is logged in and the returned obj for connecting with db is not undefined, with onSnapshot() listen to the 
+      changes in the collection, feed snapshot of the collection to onCollectionUpdate() and return the unsunbscribe()*/
+      if (user) {
+        if (this.referenceMessages) {
+          this.unsubscribe = this.referenceMessages
+            .orderBy("createdAt", "desc")
+            .onSnapshot(this.onCollectionUpdate);
+        }
+        //store uid in the state(necessary)
+        this.setState({
+          uid: user.uid,
+        });
+      }
+    })
   }
 
   componentWillUnmount() {
