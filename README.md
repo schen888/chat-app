@@ -34,10 +34,9 @@ JavaScript, React Native, Expo, GiftedChat, Firebase
 - In the **Storage** dashboard under **Rules** tag, change `allow read, write: if false` to `true`
 
 <picture>
-  <img alt="A screenshot of the start view in chat-app" src="/img/Screenshot1.jpg" style="visibility: visible; max-width:48%">
-  
+  <img alt="A screenshot of the start view in chat-app" src="/img/Screenshot1.jpg" width:48%>
 </picture>
 
 <picture>
-  <img alt="A screenshot of the chat view in chat-app" src="/img/Screenshot2.jpg" style="visibility: visible; max-width:48%; margin-left:2%;">
+  <img alt="A screenshot of the chat view in chat-app" src="/img/Screenshot2.jpg" width:48%>
 </picture>
