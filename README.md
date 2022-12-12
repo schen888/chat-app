@@ -33,5 +33,5 @@ JavaScript, React Native, Expo, GiftedChat, Firebase
 - In order to be able to send images, head over to **Storage** and click on **Get Started**. Keep everything as default settings.
 - In the **Storage** dashboard under **Rules** tag, change `allow read, write: if false` to `true`
 
-![A screenshot of the start view in chat-app](/img/screenshot1.jpg)
-![A screenshot of the chat view in chat-app](/img/screenshot2.jpg)
+![A screenshot of the start view in chat-app](/img/Screenshot1.jpg)
+![A screenshot of the chat view in chat-app](/img/Screenshot2.jpg)
