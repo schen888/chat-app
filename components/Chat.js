@@ -6,6 +6,7 @@ import firebase from 'firebase';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from '@react-native-community/netinfo';
 import CustomActions from './CustomActions';
+import MapView from 'react-native-maps';
 
 export default class Chat extends React.Component {
   constructor() {
@@ -53,6 +54,8 @@ export default class Chat extends React.Component {
         text: data.text,
         createdAt: data.createdAt.toDate(),
         user: data.user,
+        image: data.image,
+        location: data.location
       });
       this.setState({messages})
     });
@@ -61,12 +64,13 @@ export default class Chat extends React.Component {
   // also async????
   addMessage=()=>{
     const message = this.state.messages[0];
-    console.log('addMessage:', message);
     
       this.referenceMessages.add({
         uid: this.state.uid,
         _id: message._id,
         text: message.text || '',
+        image: message.image || '',
+        location: message.location || null,
         createdAt: message.createdAt,
         user: message.user,
       });
@@ -87,11 +91,9 @@ export default class Chat extends React.Component {
     let messages = "";
     try {
       messages = await AsyncStorage.getItem('messages') || [];
-      console.log('messages in the asyncStorage:', messages);
       this.setState({
         messages: JSON.parse(messages)
       });
-      console.log('state after getMessage:', this.state.messages);
     } catch (error) {
       console.log(error.message);
     }
@@ -130,11 +132,10 @@ export default class Chat extends React.Component {
 
      //Authenticate user
      this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
-      console.log('user1', user);
       if (!user) {
         await firebase.auth().signInAnonymously();
       }
-      console.log('user2', user);
+
       /* after user is logged in and the returned obj for connecting with db is not undefined, with onSnapshot() listen to the 
       changes in the collection, feed snapshot of the collection to onCollectionUpdate() and return the unsunbscribe()*/
       if (user) {
@@ -191,6 +192,25 @@ export default class Chat extends React.Component {
     return <CustomActions {...props} />;
   };
 
+  //render map
+  renderCustomView(props) {
+    const { currentMessage } = props;
+    if (currentMessage.location) {
+      return (
+        <MapView
+          style={{ width: 150, height: 100, borderRadius: 13, margin: 3 }}
+          region={{
+            latitude: currentMessage.location.latitude,
+            longitude: currentMessage.location.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+        />
+      );
+    }
+    return null;
+  }
+
   render() {
     let color=this.props.route.params.color;
     let name = this.props.route.params.name;
@@ -201,6 +221,7 @@ export default class Chat extends React.Component {
             renderBubble={this.renderBubble.bind(this)}
             renderInputToolbar={this.renderInputToolbar.bind(this)}
             renderActions={this.renderCustomActions.bind(this)}
+            renderCustomView={this.renderCustomView.bind(this)}
             messages={this.state.messages}
             onSend={messages => this.onSend(messages)}
             user={{

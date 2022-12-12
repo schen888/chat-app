@@ -10,18 +10,17 @@
  
  export default class CustomActions extends React.Component {
 
-   // Function to select a photo from library
+   //Select a photo from library
    imagePicker = async () => {
-     // expo permission
-     const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+     //expo permission to access media libary
+     const { status } = await Permissions.askAsync(Permissions.MEDIA_LIBRARY);
      try {
        if (status === 'granted') {
-         // pick image
          const result = await ImagePicker.launchImageLibraryAsync({
-           mediaTypes: ImagePicker.MediaTypeOptions.Images, // only images are allowed
+           mediaTypes: ImagePicker.MediaTypeOptions.Images, // option: only images permitted
          }).catch((error) => console.log(error));
-         // canceled process
-         if (!result.cancelled) {
+         // if process canceled
+         if (!result.canceled) {
            const imageUrl = await this.uploadImageFetch(result.uri);
            this.props.onSend({ image: imageUrl });
          }
@@ -31,18 +30,19 @@
      }
    };
  
-   // Function to take a new photo
+   //Take photo
    takePhoto = async () => {
+    //permission to access user's camera and media library
      const { status } = await Permissions.askAsync(
        Permissions.CAMERA,
-       Permissions.CAMERA_ROLL
+       Permissions.MEDIA_LIBRARY
      );
      try {
        if (status === 'granted') {
          const result = await ImagePicker.launchCameraAsync({
            mediaTypes: ImagePicker.MediaTypeOptions.Images,
          }).catch((error) => console.log(error));
- 
+
          if (!result.cancelled) {
            const imageUrl = await this.uploadImageFetch(result.uri);
            this.props.onSend({ image: imageUrl });
@@ -53,7 +53,7 @@
      }
    };
  
-   // Function to get the location of the user
+   //Get the location of the user
    getLocation = async () => {
      try {
        const { status } = await Permissions.askAsync(Permissions.LOCATION);
@@ -79,6 +79,7 @@
  
    // Upload images to firebase
    uploadImageFetch = async (uri) => {
+    console.log('uri:', uri);
      const blob = await new Promise((resolve, reject) => {
        const xhr = new XMLHttpRequest();
        xhr.onload = function () {
@@ -105,9 +106,8 @@
      return await snapshot.ref.getDownloadURL();
    };
  
-   // Function that handles communication features
+   //Communication features handler
    onActionPress = () => {
-    console.log('onactionpreses');
      const options = [
        'Choose From Library',
        'Take Picture',
@@ -115,23 +115,20 @@
        'Cancel',
      ];
      const cancelButtonIndex = options.length - 1;
+     //Generate actionSheet
      this.props.showActionSheetWithOptions(
        {
          options,
          cancelButtonIndex,
        },
        async (buttonIndex) => {
-        console.log('inshowActionSheetWithOptions');
          switch (buttonIndex) {
            case 0:
-             console.log('user wants to pick an image');
-             return this.imagePicker();
+            return this.imagePicker();
            case 1:
-             console.log('user wants to take a photo');
-             return this.takePhoto();
+            return this.takePhoto();
            case 2:
-             console.log('user wants to get their location');
-             return this.getLocation();
+            return this.getLocation();
          }
        }
      );
@@ -142,7 +139,7 @@
        <TouchableOpacity
          accessible={true}
          accessibilityLabel="More options"
-         accessibilityHint="Let you choose to send an image or your geolocation."
+         accessibilityHint="Options for sending an image from your media libary, taking and sending a picture or your geolocation."
          style={[styles.container]}
          onPress={this.onActionPress.bind(this)}
        >
