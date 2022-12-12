@@ -1,4 +1,4 @@
-## Chat APP
+## Chat APP:iphone:
 A project uses React Native, Expo, and Google Firestore Database to build a native moblie chat app.
 
 ## Key Features
