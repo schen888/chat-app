@@ -197,8 +197,9 @@ export default class Chat extends React.Component {
     const { currentMessage } = props;
     if (currentMessage.location) {
       return (
+        <View style={{alignSelf: 'center', width: 150, height: 100, borderRadius: 13, margin: 3, overflow: 'hidden' }}>
         <MapView
-          style={{ width: 150, height: 100, borderRadius: 13, margin: 3 }}
+          style={{ width: '100%', height: 100,}}
           region={{
             latitude: currentMessage.location.latitude,
             longitude: currentMessage.location.longitude,
@@ -206,6 +207,7 @@ export default class Chat extends React.Component {
             longitudeDelta: 0.0421,
           }}
         />
+      </View>
       );
     }
     return null;
