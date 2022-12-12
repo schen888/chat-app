@@ -35,3 +35,7 @@ JavaScript, React Native, Expo, GiftedChat, Firebase
 
 ![A screenshot of the start view in chat-app](/img/Screenshot1.jpg)
 ![A screenshot of the chat view in chat-app](/img/Screenshot2.jpg)
+
+<picture>
+  <img alt="Shows an illustrated sun in light mode and a moon with stars in dark mode." src="/img/Screenshot2.jpg">
+</picture>
