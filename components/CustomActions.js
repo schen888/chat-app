@@ -169,7 +169,7 @@
    iconText: {
      color: '#b2b2b2',
      fontWeight: 'bold',
-     fontSize: 10,
+     fontSize: 8,
      backgroundColor: 'transparent',
      textAlign: 'center',
      

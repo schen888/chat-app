@@ -168,7 +168,7 @@ export default class Chat extends React.Component {
         {...props}
         wrapperStyle={{
           right: {
-            backgroundColor: '#000'
+            backgroundColor: '#1e1e1e'
           }
         }}
       />
