@@ -38,4 +38,4 @@ JavaScript, React Native, Expo, GiftedChat, Firebase
 
 
 
-  <img alt="A screenshot of the chat view in chat-app" src="/img/Screenshot2.jpg" width="48%">
+  <img alt="A screenshot of the chat view in chat-app" src="/img/Screenshot2.jpg" width="48%" margin-left="2%">
